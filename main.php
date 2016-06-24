@@ -31,11 +31,6 @@ if (!defined("LDAP_ALLOW_PERSONNEL2")) define ("LDAP_ALLOW_PERSONNEL2", "{PHOTO}
 
 if (!defined("LDAP_MEMBEROF_ALLOW")) define ("LDAP_MEMBEROF_ALLOW", "cn=applications.userinfo.l2-users,ou=groups,dc=univ-paris1,dc=fr");
 
-// fonction generique qui va parser le fichier de config
-function getConfValues ($section) {
-   $ini_array = parse_ini_file("conf/conf.ini", true);
-   return $ini_array[$section];
-}
 
 /* FONCTIONS PRINCIPALES */
 
@@ -44,12 +39,13 @@ function getConfValues ($section) {
  * Le filtre LDAP (sur un uid ou un numero étudiant) est passé en paramètre
  * Retourne un Array (attr1 => valeur1, attr2 => valeur2, etc.)
  */
-function getLdapUserInfo($ldapIni, $rLdap, $filter) {
+function getLdapUserInfo($rLdap, $filter) {
+	global $conf;
 	$resUser = array();
     $wantedAttrs = array(LDAP_UID, LDAP_NUMETU, LDAP_CIVILITE, LDAP_PRIMARY_AFFILIATION,
 			             LDAP_PHOTO, LDAP_UP1_TERMS_OF_USE, LDAP_MEMBER_OF);
 	if ($filter != "" && $rLdap) {
-		$result = ldap_search($rLdap, $ldapIni['peopleDn'], $filter, $wantedAttrs, 0, 1);
+		$result = ldap_search($rLdap, $conf['ldap.dn']['people'], $filter, $wantedAttrs, 0, 1);
 		$entries = ldap_get_entries($rLdap, $result);
 		if ($result and ($entries["count"]==1)) {
 			foreach ($wantedAttrs as $attr) {
@@ -61,10 +57,10 @@ function getLdapUserInfo($ldapIni, $rLdap, $filter) {
 }
 
 // LDAP connection and bind
-function ldapConnect($conf) {
-	$rLdap = ldap_connect($conf['host'], intval($conf['port']));
+function ldapConnect($ldapConf) {
+	$rLdap = ldap_connect($ldapConf['host'], intval($ldapConf['port']));
 	if ($rLdap) {
-		$bind = ldap_bind($rLdap, $conf['user'], $conf['pwd']);
+		$bind = ldap_bind($rLdap, $ldapConf['user'], $ldapConf['pwd']);
 		if (!$bind)  $rLdap=false;
 	}
 	return $rLdap;
@@ -78,17 +74,18 @@ function ldapClose($rLdap) {
 /**
  * Recherche dans le LDAP les infos du user authentifié (le cas échéant) 
  */
-function getAuthUserInfo ($casIni, $ldapIni, $rLdap) {
+function getAuthUserInfo ($casIni, $rLdap) {
+	global $conf;
 	$resUser = array();
-	require $casIni['libPath'];
-	phpCAS::client(CAS_VERSION_2_0, $casIni['host'], intval($casIni['port']), $casIni['url'], false);
+	require $conf['lib']['cas'];
+	phpCAS::client(CAS_VERSION_2_0, $casIni['host'], intval($casIni['port']), $casIni['uri'], false);
 	phpCAS::setNoCasServerValidation();
 	phpCAS::setLang(PHPCAS_LANG_FRENCH);
 	$auth = phpCAS::checkAuthentication();   // check CAS authentication
 	if ($auth) {     // le user est authentifié
 		$userid = phpCAS::getUser();
 		$filter = LDAP_UID."=$userid";
-		$resUser = getLdapUserInfo($ldapIni, $rLdap, $filter);		
+		$resUser = getLdapUserInfo($rLdap, $filter);		
 	}
 	return $resUser;
 }
@@ -96,7 +93,7 @@ function getAuthUserInfo ($casIni, $ldapIni, $rLdap) {
 /**
  * Recherche dans le LDAP les infos du user en paramètre (en fonction des paramètres passés à l'URL)
  */
-function getParamUserInfo($ldapIni, $rLdap) {
+function getParamUserInfo($rLdap) {
 	$filter = "";
 	if (isset($_GET[PARAM_UID])) {   // on a un parametre uid
 		$param = ldap_escape_string($_GET[PARAM_UID]);
@@ -105,7 +102,7 @@ function getParamUserInfo($ldapIni, $rLdap) {
 		$param = ldap_escape_string($_GET[PARAM_NUMETU]);
 		$filter = LDAP_NUMETU."=$param";
 	}
-	return getLdapUserInfo($ldapIni, $rLdap, $filter);
+	return getLdapUserInfo($rLdap, $filter);
 }
 
 /**
@@ -185,8 +182,9 @@ function checkAutorisationUser($userPhoto, $user) {
  * Récupère la photo de l'étudiant dans Apogee, à partir du numéro étudiant
  */
 function getPhotoEtu($numetu) {
+	global $conf;
 	$photoEtu = null;
-	$confApogee = getConfValues('apogee');  // recup de la conf Apogee dans le fichier ini
+	$confApogee = $conf['apogee'];  // recup de la conf Apogee dans le fichier ini
 	$conn = apogeeConnect($confApogee);  // connexion à Apogee
 	if ($conn) {
 		$stmt = oci_parse($conn, 'select photo from up1_photo where cod_etu = :numetu ');
@@ -202,11 +200,11 @@ function getPhotoEtu($numetu) {
 }
 
 // Connection Apogee
-function apogeeConnect($conf) {
+function apogeeConnect($confApo) {
 	$db = "(DESCRIPTION=(ADDRESS_LIST =
-	    (ADDRESS = (PROTOCOL = TCP)(HOST = ".$conf['host'].")
-	    (PORT = ".$conf['port'].")))(CONNECT_DATA=(SID=".$conf['name'].")))";
-	$conn = oci_connect($conf['user'], $conf['pwd'], $db, 'utf8');
+	    (ADDRESS = (PROTOCOL = TCP)(HOST = ".$confApo['host'].")
+	    (PORT = ".$confApo['port'].")))(CONNECT_DATA=(SID=".$confApo['name'].")))";
+	$conn = oci_connect($confApo['user'], $confApo['pwd'], $db, 'utf8');
 	return $conn;
 }
 

@@ -5,14 +5,14 @@ if (!defined("IMG_FORBIDDEN_FEMALE")) define ("IMG_FORBIDDEN_FEMALE", "../img/fo
 if (!defined("IMG_FORBIDDEN_MALE")) define ("IMG_FORBIDDEN_MALE", "../img/forbidden-male.jpg");
 if (!defined("IMG_UNKNOWN_USER")) define ("IMG_UNKNOWN_USER", "../img/unknown-user.jpg");
 
+include '../config.php';
 include '../main.php';
 
 // config : recuperation des valeurs (par section)
-$ldapIni = getConfValues('ldap');
+$ldapIni = $conf['ldap'];
 
 if (isset($_GET[PARAM_TEST])) {  // config avec LDAP de test
-	$ldapIni['host'] = $ldapIni['host-test'];
-	$ldapIni['pwd'] = $ldapIni['pwd-test'];	
+	$ldapIni = $conf['ldap.test'];	
 }
 
 // connection ldap
@@ -23,9 +23,9 @@ $userPenpal = array();
 if (isset($_GET[PARAM_PENPAL])) {   // on a un parametre penpal
 	$param = ldap_escape_string($_GET[PARAM_PENPAL]);
 	$filter = LDAP_UID."=$param";
-	$userPenpal = getLdapUserInfo($ldapIni, $rLdap, $filter);
+	$userPenpal = getLdapUserInfo($rLdap, $filter);
 }
-$userUid = getParamUserInfo($ldapIni, $rLdap);  // on a un parametre uid ou numetu (sinon, retourne un tableau vide)
+$userUid = getParamUserInfo($rLdap);  // on a un parametre uid ou numetu (sinon, retourne un tableau vide)
 
 // close ldap connection
 ldapClose($rLdap);
