@@ -1,0 +1,3 @@
+# exclude config.php file and lib directory
+config.php
+lib/*
