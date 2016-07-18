@@ -11,7 +11,7 @@ include '../main.php';
 // config : recuperation des valeurs (par section)
 $ldapIni = $conf['ldap'];
 
-if (isset($_GET[PARAM_TEST])) {  // config avec LDAP de test
+if (isset($_GET[PARAM_LDAP_TEST])) {  // config avec LDAP de test
 	$ldapIni = $conf['ldap.test'];	
 }
 

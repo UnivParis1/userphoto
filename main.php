@@ -15,7 +15,8 @@ if (!defined("LDAP_MEMBER_OF")) define ("LDAP_MEMBER_OF", "memberof");
 
 if (!defined("PARAM_NUMETU")) define ("PARAM_NUMETU", "numetu");
 if (!defined("PARAM_UID")) define ("PARAM_UID", "uid");
-if (!defined("PARAM_TEST")) define ("PARAM_TEST", "test");
+if (!defined("PARAM_LDAP_TEST")) define ("PARAM_LDAP_TEST", "ldap-test");
+if (!defined("PARAM_CAS_TEST")) define ("PARAM_CAS_TEST", "cas-test");
 if (!defined("PARAM_PENPAL")) define ("PARAM_PENPAL", "penpal");
 if (!defined("PARAM_LOGIN")) define ("PARAM_LOGIN", "login");
 

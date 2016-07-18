@@ -12,8 +12,10 @@ include 'main.php';
 $casIni = $conf['cas'];
 $ldapIni = $conf['ldap'];
 
-if (isset($_GET[PARAM_TEST])) {  // config avec CAS et LDAP de test
+if (isset($_GET[PARAM_CAS_TEST])) {  // config avec CAS de test
 	$casIni = $conf['cas.test'];
+}
+if (isset($_GET[PARAM_LDAP_TEST])) {  // config avec LDAP de test
 	$ldapIni = $conf['ldap.test'];
 }
 
