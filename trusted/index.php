@@ -34,9 +34,16 @@ ldapClose($rLdap);
 // cette fonction prend en paramètres :
 // 1) le user dont on doit afficher la photo 
 // 2) le user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo
+// ou 2bis) le profil pour lequel l'affichage de la photo doit être autorisé
 if (isset($_GET[PARAM_PENPAL]) && (isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]))) {
 	afficheUserPhoto($userUid, $userPenpal);
-} else {  // s'il manque un des 2 paramètres, voire les 2, retourne une erreur 400
+} elseif ((isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU])) && isset($_GET[LDAP_UP1_TERMS_OF_USE])) {
+	$listeDroits= explode(";", $_GET[LDAP_UP1_TERMS_OF_USE]);
+    afficheUserPhotoDroits($userUid, $listeDroits);	  
+} elseif (isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU])) { // juste l'uid (ou le numetu), afficher la photo dans tous les cas (en trusted)
+	afficheUserPhoto($userUid);
+} else {	
+	// s'il manque le paramètre uid (ou numetu), ou s'il n'y a aucun paramètre dans l'url, retourne une erreur 400
 	$msg = "<b>Error : Your request is missing a required parameter</b>";
 	header("HTTP/1.0 400 $msg");
 	echo("$msg\n");

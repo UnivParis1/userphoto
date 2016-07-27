@@ -114,10 +114,7 @@ function getParamUserInfo($rLdap) {
  * 3) éventuellement un 2nd user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo
  */
 function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2=null) {
-	if (isset($_GET['v'])) {  // paramètre pour la prolongationENT qui va passer v=${modifyTimestamp}
-		//"private" car on ne veut pas qu'un forward proxy mette en cache une photo, outre passant la protection CAS
-		header_remove("Pragma"); header("Cache-Control:private, max-age=86401");   // 1 journée seulement, pour qu'une machine partagée n'accumule des photos dans son cache
-	} 
+	check_param_v();
 	header("Content-type: image/jpeg");
 	if (empty($userPhoto))  {  // photo "unknown", user inconnu (user non authentifié, paramètre uid incorrect)
 		readfile(IMG_UNKNOWN_USER);
@@ -233,5 +230,46 @@ function getSilhouetteGenre($civilite, $typeSilhouette) {
 	}
 }
 
+
+/**
+ * Affiche la photo d'un user en fonction des autorisations données
+ * Prend en paramètres : 
+ * 1) le user dont on doit afficher la photo
+ * 2) un tableau avec la liste des droits/profils pour lequel l'affichage de la photo doit être autorisé
+ * Utilisée uniquement en mode "trusted"
+ */
+function afficheUserPhotoDroits($userPhoto, $listeDroits) {	
+	check_param_v();
+	header("Content-type: image/jpeg");
+	if (empty($userPhoto))  {  // photo "unknown", user inconnu 
+		readfile(IMG_UNKNOWN_USER);
+	} else {
+		if ($userPhoto[LDAP_PRIMARY_AFFILIATION][0] == USER_STUDENT) {  // on doit rechercher la photo de l'étudiant dans Apogee
+			$userPhoto[LDAP_PHOTO][0] = getPhotoEtu($userPhoto[LDAP_NUMETU][0]);
+		}
+		if ($userPhoto[LDAP_PHOTO][0] == null) {  // pas de photo trouvée (silhouette "empty")
+			readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_EMPTY));
+		} else {  // il y a une photo => on vérifie les autorisations pour savoir s'il faut l'afficher ou pas
+			$autorisation = false;
+			foreach ($userPhoto[LDAP_UP1_TERMS_OF_USE] as $droitAutorisation) {
+				if (in_array($droitAutorisation, $listeDroits)) {
+					$autorisation = true;
+					break;
+				}
+			}			
+			// affichage de la photo si autorisation, sinon silhouette "forbidden"
+			if ($autorisation)  	print $userPhoto[LDAP_PHOTO][0];
+			else 	readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_FORBIDDEN));
+		}
+	}		
+}
+
+/* Paramètre pour la prolongationENT qui va passer v=${modifyTimestamp} */
+function check_param_v() {
+	if (isset($_GET['v'])) {  
+		//"private" car on ne veut pas qu'un forward proxy mette en cache une photo, outre passant la protection CAS
+		header_remove("Pragma"); header("Cache-Control:private, max-age=86401");   // 1 journée seulement, pour qu'une machine partagée n'accumule des photos dans son cache
+	}
+}
 
 ?>
