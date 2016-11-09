@@ -12,6 +12,9 @@ $conf['cas.test']['host'] = "cas-test.univ-paris1.fr";
 $conf['cas.test']['port'] = "443";
 $conf['cas.test']['uri'] = "cas";
 
+// si ce parametre est a true, on recupere la photo (des étudiants) dans Apogee, sinon on la prend du LDAP (et il n'est
+// pas nécessaire de remplir les parametres de connexion a Apogee)
+$conf['apogee']['photo'] = true;   // true ou false
 // paramètres de connexion à Apogee (pour la photo de l'etudiant)
 $conf['apogee']['host'] = "xxxxxxxx";
 $conf['apogee']['port'] = "1521";

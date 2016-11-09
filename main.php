@@ -114,12 +114,13 @@ function getParamUserInfo($rLdap) {
  * 3) éventuellement un 2nd user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo
  */
 function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2=null) {
+	global $conf;
 	check_param_v();
 	header("Content-type: image/jpeg");
 	if (empty($userPhoto))  {  // photo "unknown", user inconnu (user non authentifié, paramètre uid incorrect)
 		readfile(IMG_UNKNOWN_USER);
 	} else {  
-		if ($userPhoto[LDAP_PRIMARY_AFFILIATION][0] == USER_STUDENT) {  // on doit rechercher la photo de l'étudiant dans Apogee
+		if ($userPhoto[LDAP_PRIMARY_AFFILIATION][0] == USER_STUDENT && $conf['apogee']['photo']) {  // on doit rechercher la photo de l'étudiant dans Apogee
 			$userPhoto[LDAP_PHOTO][0] = getPhotoEtu($userPhoto[LDAP_NUMETU][0]);
 		}
 		if ($userPhoto[LDAP_PHOTO][0] == null) {  // pas de photo trouvée (silhouette "empty")
@@ -239,12 +240,13 @@ function getSilhouetteGenre($civilite, $typeSilhouette) {
  * Utilisée uniquement en mode "trusted"
  */
 function afficheUserPhotoDroits($userPhoto, $listeDroits) {	
+	global $conf;
 	check_param_v();
 	header("Content-type: image/jpeg");
 	if (empty($userPhoto))  {  // photo "unknown", user inconnu 
 		readfile(IMG_UNKNOWN_USER);
 	} else {
-		if ($userPhoto[LDAP_PRIMARY_AFFILIATION][0] == USER_STUDENT) {  // on doit rechercher la photo de l'étudiant dans Apogee
+		if ($userPhoto[LDAP_PRIMARY_AFFILIATION][0] == USER_STUDENT && $conf['apogee']['photo']) {  // on doit rechercher la photo de l'étudiant dans Apogee
 			$userPhoto[LDAP_PHOTO][0] = getPhotoEtu($userPhoto[LDAP_NUMETU][0]);
 		}
 		if ($userPhoto[LDAP_PHOTO][0] == null) {  // pas de photo trouvée (silhouette "empty")
