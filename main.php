@@ -79,8 +79,9 @@ function getAuthUserInfo ($casIni, $rLdap) {
 	global $conf;
 	$resUser = array();
 	require $conf['lib']['cas'];
-	phpCAS::client(CAS_VERSION_2_0, $casIni['host'], intval($casIni['port']), $casIni['uri'], false);
+	phpCAS::client(CAS_VERSION_2_0, $casIni['host'], intval($casIni['port']), $casIni['uri']);
 	phpCAS::setNoCasServerValidation();
+	phpCAS::handleLogoutRequests(false);
 	phpCAS::setLang(PHPCAS_LANG_FRENCH);
 	$auth = phpCAS::checkAuthentication();   // check CAS authentication
 	if ($auth) {     // le user est authentifié
