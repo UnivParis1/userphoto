@@ -254,11 +254,13 @@ function afficheUserPhotoDroits($userPhoto, $listeDroits) {
 			readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_EMPTY));
 		} else {  // il y a une photo => on vérifie les autorisations pour savoir s'il faut l'afficher ou pas
 			$autorisation = false;
-			foreach ($userPhoto[LDAP_UP1_TERMS_OF_USE] as $droitAutorisation) {
+			if (isset($userPhoto[LDAP_UP1_TERMS_OF_USE])) {
+			  foreach ($userPhoto[LDAP_UP1_TERMS_OF_USE] as $droitAutorisation) {
 				if (in_array($droitAutorisation, $listeDroits)) {
 					$autorisation = true;
 					break;
 				}
+			  }			
 			}			
 			// affichage de la photo si autorisation, sinon silhouette "forbidden"
 			if ($autorisation)  	print $userPhoto[LDAP_PHOTO][0];
