@@ -18,7 +18,7 @@ if (!defined("PARAM_UID")) define ("PARAM_UID", "uid");
 if (!defined("PARAM_LDAP_TEST")) define ("PARAM_LDAP_TEST", "ldap-test");
 if (!defined("PARAM_CAS_TEST")) define ("PARAM_CAS_TEST", "cas-test");
 if (!defined("PARAM_PENPAL")) define ("PARAM_PENPAL", "penpal");
-if (!defined("PARAM_LOGIN")) define ("PARAM_LOGIN", "login");
+if (!defined("PARAM_PENPAL_AFFILIATION")) define ("PARAM_PENPAL_AFFILIATION", "penpalAffiliation");
 
 if (!defined("TYPE_EMPTY")) define ("TYPE_EMPTY", "empty");
 if (!defined("TYPE_FORBIDDEN")) define ("TYPE_FORBIDDEN", "forbidden");
@@ -162,7 +162,7 @@ function checkAutorisationUser($userPhoto, $user) {
 	// $user pourra voir la photo de $userPhoto si l'une des conditions suivantes est remplie : 
 	// -si $user est un étudiant et que $userPhoto a autorisé la diffusion de sa photo aux étudiants 
 	// -si $user est un personnel et que $userPhoto a autorisé la diffusion de sa photo aux personnels
-	// -si $user et $userPhoto sont la même personne
+	// -si $user et $userPhoto sont la même personne et qu'il n'y a pas de paramètre penpalAffiliation dans l'url
 	// -si $user est membre d'un groupe LDAP autorisé à voir les photos
 	$listDroits = $userPhoto[LDAP_UP1_TERMS_OF_USE];
 	if (is_null($listDroits)) {
@@ -170,7 +170,8 @@ function checkAutorisationUser($userPhoto, $user) {
 	}
 	if ( ($profilUser==USER_STUDENT && in_array(LDAP_ALLOW_STUDENT, $listDroits)) ||
 	     ($profilUser==USER_PERSONNEL && (in_array(LDAP_ALLOW_PERSONNEL, $listDroits) || in_array(LDAP_ALLOW_PERSONNEL2, $listDroits))) ||
-		 ($profilUser!=USER_UNKNOWN && ($userPhoto[LDAP_UID][0] == $user[LDAP_UID][0] || in_array(LDAP_MEMBEROF_ALLOW, $user[LDAP_MEMBER_OF])))
+		 ($profilUser!=USER_UNKNOWN && (($userPhoto[LDAP_UID][0] == $user[LDAP_UID][0] && !isset($_GET[PARAM_PENPAL_AFFILIATION])) 
+		 		                       || in_array(LDAP_MEMBEROF_ALLOW, $user[LDAP_MEMBER_OF])))
 	) {
 		$autorisation = true;
 	}				                       
