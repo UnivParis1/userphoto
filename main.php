@@ -116,7 +116,6 @@ function getParamUserInfo($rLdap) {
  */
 function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2=null) {
 	global $conf;
-	check_param_v();
 	header("Content-type: image/jpeg");
 	if (empty($userPhoto))  {  // photo "unknown", user inconnu (user non authentifié, paramètre uid incorrect)
 		readfile(IMG_UNKNOWN_USER);
@@ -142,8 +141,11 @@ function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2
 				}				
 			}
 			// affichage de la photo si autorisation, sinon silhouette "forbidden"
-			if ($autorisation)  	print $userPhoto[LDAP_PHOTO][0];  
-			else 	readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_FORBIDDEN));				
+			if ($autorisation) {  	
+                                check_param_v();
+				print $userPhoto[LDAP_PHOTO][0];
+                        }     
+			else { 	readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_FORBIDDEN));	}			
 		}
 	}
 }
@@ -243,7 +245,6 @@ function getSilhouetteGenre($civilite, $typeSilhouette) {
  */
 function afficheUserPhotoDroits($userPhoto, $listeDroits) {	
 	global $conf;
-	check_param_v();
 	header("Content-type: image/jpeg");
 	if (empty($userPhoto))  {  // photo "unknown", user inconnu 
 		readfile(IMG_UNKNOWN_USER);
@@ -264,8 +265,11 @@ function afficheUserPhotoDroits($userPhoto, $listeDroits) {
 			  }			
 			}			
 			// affichage de la photo si autorisation, sinon silhouette "forbidden"
-			if ($autorisation)  	print $userPhoto[LDAP_PHOTO][0];
-			else 	readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_FORBIDDEN));
+			if ($autorisation) {
+                                check_param_v();
+                             	print $userPhoto[LDAP_PHOTO][0];
+			}
+                        else {	readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_FORBIDDEN)); }
 		}
 	}		
 }
