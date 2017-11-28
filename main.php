@@ -19,6 +19,7 @@ if (!defined("PARAM_LDAP_TEST")) define ("PARAM_LDAP_TEST", "ldap-test");
 if (!defined("PARAM_CAS_TEST")) define ("PARAM_CAS_TEST", "cas-test");
 if (!defined("PARAM_PENPAL")) define ("PARAM_PENPAL", "penpal");
 if (!defined("PARAM_PENPAL_AFFILIATION")) define ("PARAM_PENPAL_AFFILIATION", "penpalAffiliation");
+if (!defined("PARAM_APP_CLIENTE")) define ("PARAM_APP_CLIENTE", "app-cli");
 
 if (!defined("TYPE_EMPTY")) define ("TYPE_EMPTY", "empty");
 if (!defined("TYPE_FORBIDDEN")) define ("TYPE_FORBIDDEN", "forbidden");
@@ -31,7 +32,7 @@ if (!defined("LDAP_ALLOW_PERSONNEL")) define ("LDAP_ALLOW_PERSONNEL", "{PHOTO}IN
 if (!defined("LDAP_ALLOW_PERSONNEL2")) define ("LDAP_ALLOW_PERSONNEL2", "{PHOTO}ACTIVE");
 
 if (!defined("LDAP_MEMBEROF_ALLOW")) define ("LDAP_MEMBEROF_ALLOW", "cn=applications.userinfo.l2-users,ou=groups,dc=univ-paris1,dc=fr");
-
+if (!defined("APP_USERINFO")) define ("APP_USERINFO", "userinfo");
 
 /* FONCTIONS PRINCIPALES */
 
@@ -165,7 +166,7 @@ function checkAutorisationUser($userPhoto, $user) {
 	// -si $user est un étudiant et que $userPhoto a autorisé la diffusion de sa photo aux étudiants 
 	// -si $user est un personnel et que $userPhoto a autorisé la diffusion de sa photo aux personnels
 	// -si $user et $userPhoto sont la même personne et qu'il n'y a pas de paramètre penpalAffiliation dans l'url
-	// -si $user est membre d'un groupe LDAP autorisé à voir les photos
+	// -si $user est membre d'un groupe LDAP autorisé à voir les photos depuis l'application userinfo
 	$listDroits = $userPhoto[LDAP_UP1_TERMS_OF_USE];
 	if (is_null($listDroits)) {
 		$listDroits = array();
@@ -173,7 +174,7 @@ function checkAutorisationUser($userPhoto, $user) {
 	if ( ($profilUser==USER_STUDENT && in_array(LDAP_ALLOW_STUDENT, $listDroits)) ||
 	     ($profilUser==USER_PERSONNEL && (in_array(LDAP_ALLOW_PERSONNEL, $listDroits) || in_array(LDAP_ALLOW_PERSONNEL2, $listDroits))) ||
 		 ($profilUser!=USER_UNKNOWN && (($userPhoto[LDAP_UID][0] == $user[LDAP_UID][0] && !isset($_GET[PARAM_PENPAL_AFFILIATION])) 
-		 		                       || in_array(LDAP_MEMBEROF_ALLOW, $user[LDAP_MEMBER_OF])))
+		  || (in_array(LDAP_MEMBEROF_ALLOW, $user[LDAP_MEMBER_OF]) && isset($_GET[PARAM_APP_CLIENTE]) && $_GET[PARAM_APP_CLIENTE]==APP_USERINFO)))
 	) {
 		$autorisation = true;
 	}				                       
