@@ -116,16 +116,22 @@ function getParamUserInfo($rLdap) {
  * 3) éventuellement un 2nd user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo
  */
 function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2=null) {
-	global $conf;
-	header("Content-type: image/jpeg");
+	global $conf;	
 	if (empty($userPhoto))  {  // photo "unknown", user inconnu (user non authentifié, paramètre uid incorrect)
-		readfile(IMG_UNKNOWN_USER);
+	    header("Content-type: image/svg+xml");
+	    readfile(IMG_SILHOUETTE_FOR_PUBLIC);
 	} else {  
 		if ($userPhoto[LDAP_PRIMARY_AFFILIATION][0] == USER_STUDENT && $conf['apogee']['photo']) {  // on doit rechercher la photo de l'étudiant dans Apogee
 			$userPhoto[LDAP_PHOTO][0] = getPhotoEtu($userPhoto[LDAP_NUMETU][0]);
 		}
-		if ($userPhoto[LDAP_PHOTO][0] == null) {  // pas de photo trouvée (silhouette "empty")
-			readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_EMPTY));
+		if ($userPhoto[LDAP_PHOTO][0] == null) {  // pas de photo trouvée 
+		    if (!is_null($userAutorisation) && empty($userAutorisation)) { // le user qui veut voir la photo n'est pas authentifié, affichage d'une silhouette neutre
+		        header("Content-type: image/svg+xml");
+		        readfile(IMG_SILHOUETTE_FOR_PUBLIC);
+		    } else {  // le user qui veut voir la photo est authentifié, affichage de la silhouette "empty"
+		        header("Content-type: image/jpeg");
+			    readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_EMPTY));
+		    }
 		} else {  // il y a une photo => on vérifie les autorisations pour savoir s'il faut l'afficher ou pas
 			$autorisation = false; 
 			if (is_null($userAutorisation) && is_null($userAutorisation2)) {  
@@ -141,12 +147,21 @@ function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2
 					}									
 				}				
 			}
-			// affichage de la photo si autorisation, sinon silhouette "forbidden"
+			// affichage de la photo si autorisation, sinon silhouette "forbidden" (ou neutre pour user non authentifié)
 			if ($autorisation) {  	
-                                check_param_v();
+                check_param_v();
+                header("Content-type: image/jpeg");
 				print $userPhoto[LDAP_PHOTO][0];
-                        }     
-			else { 	readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_FORBIDDEN));	}			
+            }     
+			else { 	
+			    if (!is_null($userAutorisation) && empty($userAutorisation)) { // le user qui veut voir la photo n'est pas authentifié, affichage d'une silhouette neutre
+			        header("Content-type: image/svg+xml");
+			        readfile(IMG_SILHOUETTE_FOR_PUBLIC);
+			    } else {  // le user qui veut voir la photo est authentifié, affichage de la silhouette "forbidden"
+			        header("Content-type: image/jpeg");
+			        readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_FORBIDDEN));
+			    }
+			}			
 		}
 	}
 }

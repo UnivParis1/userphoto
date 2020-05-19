@@ -4,6 +4,7 @@ if (!defined("IMG_EMPTY_MALE")) define ("IMG_EMPTY_MALE", "img/empty-male.jpg");
 if (!defined("IMG_FORBIDDEN_FEMALE")) define ("IMG_FORBIDDEN_FEMALE", "img/forbidden-female.jpg");
 if (!defined("IMG_FORBIDDEN_MALE")) define ("IMG_FORBIDDEN_MALE", "img/forbidden-male.jpg");
 if (!defined("IMG_UNKNOWN_USER")) define ("IMG_UNKNOWN_USER", "img/unknown-user.jpg");
+if (!defined("IMG_SILHOUETTE_FOR_PUBLIC")) define ("IMG_SILHOUETTE_FOR_PUBLIC", "img/silhouette.svg");
 
 include 'config.php';
 include 'main.php';
