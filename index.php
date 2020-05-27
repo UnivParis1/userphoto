@@ -24,7 +24,11 @@ if (isset($_GET[PARAM_LDAP_TEST])) {  // config avec LDAP de test
 $rLdap = ldapConnect($ldapIni);
 
 // on recherche dans le LDAP les infos de la personne authentifiée (le cas échéant)
-$userAuth = getAuthUserInfo($casIni, $rLdap);
+// sauf dans le cas où on a "penpalAffiliation=anonymous" (ex: annuaire public) 
+$userAuth = array();
+if (!isset($_GET[PARAM_PENPAL_AFFILIATION]) || ($_GET[PARAM_PENPAL_AFFILIATION]!=ANONYMOUS_VALUE)) {
+    $userAuth = getAuthUserInfo($casIni, $rLdap);
+}
 
 // on recherche dans le LDAP les infos de la (ou des) personne(s) en fonction des paramètres passés dans l'URL
 $userPenpal = array();

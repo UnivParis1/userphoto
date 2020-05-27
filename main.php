@@ -34,6 +34,8 @@ if (!defined("LDAP_ALLOW_PERSONNEL2")) define ("LDAP_ALLOW_PERSONNEL2", "{PHOTO}
 if (!defined("LDAP_MEMBEROF_ALLOW")) define ("LDAP_MEMBEROF_ALLOW", "cn=applications.userinfo.l2-users,ou=groups,dc=univ-paris1,dc=fr");
 if (!defined("APP_USERINFO")) define ("APP_USERINFO", "userinfo");
 
+if (!defined("ANONYMOUS_VALUE")) define ("ANONYMOUS_VALUE", "anonymous");
+
 /* FONCTIONS PRINCIPALES */
 
 /**
@@ -117,9 +119,15 @@ function getParamUserInfo($rLdap) {
  */
 function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2=null) {
 	global $conf;	
-	if (empty($userPhoto))  {  // photo "unknown", user inconnu (user non authentifié, paramètre uid incorrect)
-	    header("Content-type: image/svg+xml");
-	    readfile(IMG_SILHOUETTE_FOR_PUBLIC);
+	if (empty($userPhoto))  {  // photo "unknown", user inconnu (paramètre uid incorrect, etc.)
+	    // on met une silhouette "neutre" (mais pas la même suivant le cas d'un accès authentifié ou non)
+	    if (!is_null($userAutorisation) && empty($userAutorisation)) {   // le user qui veut voir la photo n'est pas authentifié
+	       header("Content-type: image/svg+xml");
+	       readfile(IMG_SILHOUETTE_FOR_PUBLIC);
+	    } else {   // le user qui veut voir la photo est authentifié
+	        header("Content-type: image/jpeg");
+	        readfile(IMG_UNKNOWN_USER);
+	    }
 	} else {  
 		if ($userPhoto[LDAP_PRIMARY_AFFILIATION][0] == USER_STUDENT && $conf['apogee']['photo']) {  // on doit rechercher la photo de l'étudiant dans Apogee
 			$userPhoto[LDAP_PHOTO][0] = getPhotoEtu($userPhoto[LDAP_NUMETU][0]);
