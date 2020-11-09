@@ -20,6 +20,7 @@ if (!defined("PARAM_CAS_TEST")) define ("PARAM_CAS_TEST", "cas-test");
 if (!defined("PARAM_PENPAL")) define ("PARAM_PENPAL", "penpal");
 if (!defined("PARAM_PENPAL_AFFILIATION")) define ("PARAM_PENPAL_AFFILIATION", "penpalAffiliation");
 if (!defined("PARAM_APP_CLIENTE")) define ("PARAM_APP_CLIENTE", "app-cli");
+if (!defined("PARAM_RATIO")) define ("PARAM_RATIO", "ratio");
 
 if (!defined("TYPE_EMPTY")) define ("TYPE_EMPTY", "empty");
 if (!defined("TYPE_FORBIDDEN")) define ("TYPE_FORBIDDEN", "forbidden");
@@ -111,6 +112,38 @@ function getParamUserInfo($rLdap) {
 }
 
 /**
+ * Redimensionne l'image le cas échéant (paramètre ratio dans l'url)
+ */
+function resizeImage($img, $isFile) {
+    if (isset($_GET[PARAM_RATIO]) and $_GET[PARAM_RATIO]=="1") {
+        if ($isFile) {  // $img contient le chemin du fichier (c'est donc une silhouette)
+           $im = imagecreatefromjpeg($img);
+        } else {
+           $im = imagecreatefromstring($img);
+        }
+        $size = min(imagesx($im), imagesy($im));
+        $newY = max(imagesx($im), imagesy($im))*11/100;
+        $im2 = imagecrop($im, ['x' => 0, 'y' => $newY, 'width' => $size, 'height' => $size]);
+        imagedestroy($im);
+        if ($im2 !== FALSE) {
+            imagejpeg($im2);            
+        } else {  //echec du imagecrop (on affiche l'image sans redimensionnement)
+            if ($isFile) {  
+                readfile($img);
+            } else {
+                print $img;  
+            }
+        }
+    } else {  // pas de paramètre ratio dans l'url, affiche de la photo telle quel (pas de redimensionnement)
+        if ($isFile) {
+            readfile($img);
+        } else {
+            print $img;
+        }
+    }
+}
+
+/**
  * Affiche la photo d'un user en fonction des autorisations données
  * Prend en paramètres : 
  * 1) le user dont on doit afficher la photo
@@ -126,7 +159,7 @@ function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2
 	       readfile(IMG_SILHOUETTE_FOR_PUBLIC);
 	    } else {   // le user qui veut voir la photo est authentifié
 	        header("Content-type: image/jpeg");
-	        readfile(IMG_UNKNOWN_USER);
+	        resizeImage(IMG_UNKNOWN_USER, true);
 	    }
 	} else {  
 		if ($userPhoto[LDAP_PRIMARY_AFFILIATION][0] == USER_STUDENT && $conf['apogee']['photo']) {  // on doit rechercher la photo de l'étudiant dans Apogee
@@ -138,7 +171,7 @@ function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2
 		        readfile(IMG_SILHOUETTE_FOR_PUBLIC);
 		    } else {  // le user qui veut voir la photo est authentifié, affichage de la silhouette "empty"
 		        header("Content-type: image/jpeg");
-			    readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_EMPTY));
+		        resizeImage(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_EMPTY), true);
 		    }
 		} else {  // il y a une photo => on vérifie les autorisations pour savoir s'il faut l'afficher ou pas
 			$autorisation = false; 
@@ -159,7 +192,7 @@ function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2
 			if ($autorisation) {  	
                 check_param_v();
                 header("Content-type: image/jpeg");
-				print $userPhoto[LDAP_PHOTO][0];
+                resizeImage($userPhoto[LDAP_PHOTO][0], false);                
             }     
 			else { 	
 			    if (!is_null($userAutorisation) && empty($userAutorisation)) { // le user qui veut voir la photo n'est pas authentifié, affichage d'une silhouette neutre
@@ -167,7 +200,7 @@ function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2
 			        readfile(IMG_SILHOUETTE_FOR_PUBLIC);
 			    } else {  // le user qui veut voir la photo est authentifié, affichage de la silhouette "forbidden"
 			        header("Content-type: image/jpeg");
-			        readfile(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_FORBIDDEN));
+			        resizeImage(getSilhouetteGenre(@$userPhoto[LDAP_CIVILITE][0], TYPE_FORBIDDEN), true);
 			    }
 			}			
 		}
