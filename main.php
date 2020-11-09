@@ -11,10 +11,12 @@ if (!defined("LDAP_CIVILITE")) define ("LDAP_CIVILITE", "supanncivilite");
 if (!defined("LDAP_UP1_TERMS_OF_USE")) define ("LDAP_UP1_TERMS_OF_USE", "up1termsofuse");
 if (!defined("LDAP_NUMETU")) define ("LDAP_NUMETU", "supannetuid");
 if (!defined("LDAP_UID")) define ("LDAP_UID", "uid");
+if (!defined("LDAP_MAIL")) define ("LDAP_MAIL", "mail");
 if (!defined("LDAP_MEMBER_OF")) define ("LDAP_MEMBER_OF", "memberof");
 
 if (!defined("PARAM_NUMETU")) define ("PARAM_NUMETU", "numetu");
 if (!defined("PARAM_UID")) define ("PARAM_UID", "uid");
+if (!defined("PARAM_MAIL")) define ("PARAM_MAIL", "mail");
 if (!defined("PARAM_LDAP_TEST")) define ("PARAM_LDAP_TEST", "ldap-test");
 if (!defined("PARAM_CAS_TEST")) define ("PARAM_CAS_TEST", "cas-test");
 if (!defined("PARAM_PENPAL")) define ("PARAM_PENPAL", "penpal");
@@ -108,6 +110,9 @@ function getParamUserInfo($rLdap) {
 	} elseif (isset($_GET[PARAM_NUMETU])) {  // on a un parametre numetu
 		$param = ldap_escape_string($_GET[PARAM_NUMETU]);
 		$filter = LDAP_NUMETU."=$param";
+	} elseif (isset($_GET[PARAM_MAIL])) {  // on a un parametre mail
+		$param = ldap_escape_string($_GET[PARAM_MAIL]);
+		$filter = LDAP_MAIL."=$param";
 	}
 	return getLdapUserInfo($rLdap, $filter);
 }

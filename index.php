@@ -54,13 +54,14 @@ else {
     // 1) le user dont on doit afficher la photo
     // 2) éventuellement le user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo  
     // 3) éventuellement un 2nd user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo
-    if (!isset($_GET[PARAM_PENPAL]) && !isset($_GET[PARAM_UID]) && !isset($_GET[PARAM_NUMETU])) { 
+    $has_wanted_user = isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]) || isset($_GET[PARAM_MAIL]);
+    if (!isset($_GET[PARAM_PENPAL]) && !$has_wanted_user) { 
     	afficheUserPhoto($userAuth);   
-    } elseif (!isset($_GET[PARAM_PENPAL]) && (isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]))) { 
+    } elseif (!isset($_GET[PARAM_PENPAL]) && $has_wanted_user) { 
        	afficheUserPhoto($userParam, $userAuth);   
-    } elseif (isset($_GET[PARAM_PENPAL]) && !(isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU])))	{
+    } elseif (isset($_GET[PARAM_PENPAL]) && !$has_wanted_user)	{
     	afficheUserPhoto($userAuth, $userPenpal);
-    } elseif (isset($_GET[PARAM_PENPAL]) && (isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]))) {
+    } elseif (isset($_GET[PARAM_PENPAL]) && $has_wanted_user) {
     	afficheUserPhoto($userParam, $userAuth, $userPenpal);
     }
 }
