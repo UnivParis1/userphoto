@@ -87,7 +87,8 @@ function getAuthUserInfo ($casIni, $rLdap) {
 	phpCAS::setNoCasServerValidation();
 	phpCAS::handleLogoutRequests(false);
 	phpCAS::setLang(PHPCAS_LANG_FRENCH);
-	$auth = phpCAS::checkAuthentication();   // check CAS authentication
+	//$auth = phpCAS::checkAuthentication();   // check CAS authentication
+	$auth = phpCAS::forceAuthentication();
 	if ($auth) {     // le user est authentifié
 		$userid = phpCAS::getUser();
 		$filter = LDAP_UID."=$userid";
