@@ -20,43 +20,50 @@ if (isset($_GET[PARAM_LDAP_TEST])) {  // config avec LDAP de test
 	$ldapIni = $conf['ldap.test'];
 }
 
-// connection ldap
-$rLdap = ldapConnect($ldapIni);
+$posAtCharacter = strpos($_GET[PARAM_UID], "@");
+if ($posAtCharacter!==false) {   // il y a un caractère @ dans l'uid, on affiche directement la silhouette générique
+    header("Content-type: image/svg+xml");
+    readfile(IMG_SILHOUETTE_FOR_PUBLIC);
+} 
+else {
+    // connection ldap
+    $rLdap = ldapConnect($ldapIni);
 
-// on recherche dans le LDAP les infos de la personne authentifiée (le cas échéant)
-// sauf dans le cas où on a "penpalAffiliation=anonymous" (ex: annuaire public) 
-$userAuth = array();
-if (!isset($_GET[PARAM_PENPAL_AFFILIATION]) || ($_GET[PARAM_PENPAL_AFFILIATION]!=ANONYMOUS_VALUE)) {
-    $userAuth = getAuthUserInfo($casIni, $rLdap);
+    // on recherche dans le LDAP les infos de la personne authentifiée (le cas échéant)
+    // sauf dans le cas où on a "penpalAffiliation=anonymous" (ex: annuaire public) 
+    $userAuth = array();
+    if (!isset($_GET[PARAM_PENPAL_AFFILIATION]) || ($_GET[PARAM_PENPAL_AFFILIATION]!=ANONYMOUS_VALUE)) {
+         $userAuth = getAuthUserInfo($casIni, $rLdap);
+    }
+
+    // on recherche dans le LDAP les infos de la (ou des) personne(s) en fonction des paramètres passés dans l'URL
+    $userPenpal = array();
+    if (isset($_GET[PARAM_PENPAL])) {   // on a un parametre penpal
+	   $param = ldap_escape_string($_GET[PARAM_PENPAL]);
+	   $filter = LDAP_UID."=$param";
+	   $userPenpal = getLdapUserInfo($rLdap, $filter);
+    }
+    $userParam = getParamUserInfo($rLdap);  // on a un parametre uid ou numetu (sinon, retourne un tableau vide)
+
+    // close ldap connection
+    ldapClose($rLdap);
+
+
+    // on va appeler la fonction qui va afficher la photo en fonction des autorisations données
+    // cette fonction prend en paramètres : 
+    // 1) le user dont on doit afficher la photo
+    // 2) éventuellement le user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo  
+    // 3) éventuellement un 2nd user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo
+    if (!isset($_GET[PARAM_PENPAL]) && !isset($_GET[PARAM_UID]) && !isset($_GET[PARAM_NUMETU])) { 
+    	afficheUserPhoto($userAuth);   
+    } elseif (!isset($_GET[PARAM_PENPAL]) && (isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]))) { 
+       	afficheUserPhoto($userParam, $userAuth);   
+    } elseif (isset($_GET[PARAM_PENPAL]) && !(isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU])))	{
+    	afficheUserPhoto($userAuth, $userPenpal);
+    } elseif (isset($_GET[PARAM_PENPAL]) && (isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]))) {
+    	afficheUserPhoto($userParam, $userAuth, $userPenpal);
+    }
 }
-
-// on recherche dans le LDAP les infos de la (ou des) personne(s) en fonction des paramètres passés dans l'URL
-$userPenpal = array();
-if (isset($_GET[PARAM_PENPAL])) {   // on a un parametre penpal
-	$param = ldap_escape_string($_GET[PARAM_PENPAL]);
-	$filter = LDAP_UID."=$param";
-	$userPenpal = getLdapUserInfo($rLdap, $filter);
-}
-$userParam = getParamUserInfo($rLdap);  // on a un parametre uid ou numetu (sinon, retourne un tableau vide)
-
-// close ldap connection
-ldapClose($rLdap);
-
-// on va appeler la fonction qui va afficher la photo en fonction des autorisations données
-// cette fonction prend en paramètres : 
-// 1) le user dont on doit afficher la photo
-// 2) éventuellement le user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo  
-// 3) éventuellement un 2nd user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo
-if (!isset($_GET[PARAM_PENPAL]) && !isset($_GET[PARAM_UID]) && !isset($_GET[PARAM_NUMETU])) { 
-	afficheUserPhoto($userAuth);   
-} elseif (!isset($_GET[PARAM_PENPAL]) && (isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]))) { 
-	afficheUserPhoto($userParam, $userAuth);   
-} elseif (isset($_GET[PARAM_PENPAL]) && !(isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU])))	{
-	afficheUserPhoto($userAuth, $userPenpal);
-} elseif (isset($_GET[PARAM_PENPAL]) && (isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]))) {
-	afficheUserPhoto($userParam, $userAuth, $userPenpal);
-}
-
 
 ?>
 
