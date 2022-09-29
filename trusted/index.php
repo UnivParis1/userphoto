@@ -35,7 +35,7 @@ ldapClose($rLdap);
 // 1) le user dont on doit afficher la photo 
 // 2) le user dont on doit vérifier s'il a ou pas l'autorisation de voir la photo
 // ou 2bis) le profil pour lequel l'affichage de la photo doit être autorisé
-$has_wanted_user = isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]) || isset($_GET[PARAM_MAIL]);
+$has_wanted_user = isset($_GET[PARAM_UID]) || isset($_GET[PARAM_NUMETU]) || isset($_GET[PARAM_MAIL]) || isset($_GET[PARAM_EPPN]);
 if (isset($_GET[PARAM_PENPAL]) && $has_wanted_user) {
 	afficheUserPhoto($userUid, $userPenpal);
 } elseif ($has_wanted_user && isset($_GET[LDAP_UP1_TERMS_OF_USE])) {
