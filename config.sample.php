@@ -34,5 +34,12 @@ $conf['ldap.test']['pwd'] = "xxxxxxxxxxxxxx";
 
 $conf['ldap.dn']['people'] = "ou=people,dc=univ-paris1,dc=fr";
 
+$conf['rocket.chat']['url'] = 'https://rocketchat.univ.fr';
+
+$conf['EsupUserApps'] = [
+    "url" => "https://ent.univ-paris.fr/EsupUserApps/layout?app=tchat",
+    "bearerToken" => "xxxx",
+]
+
 
 ?>
