@@ -5,8 +5,10 @@ if (!defined("USER_STUDENT")) define ("USER_STUDENT", "student");
 if (!defined("USER_PERSONNEL")) define ("USER_PERSONNEL", "personnel");
 if (!defined("USER_UNKNOWN")) define ("USER_UNKNOWN", "unknown");
 
+if (!defined("VAL_PHOTO_ETU")) define ("VAL_PHOTO_ETU", "etu");
+if (!defined("VAL_PHOTO_ETU_IAE")) define ("VAL_PHOTO_ETU_IAE", "etu-iae");  
+
 if (!defined("LDAP_PRIMARY_AFFILIATION")) define ("LDAP_PRIMARY_AFFILIATION", "edupersonprimaryaffiliation");
-if (!defined("LDAP_PHOTO")) define ("LDAP_PHOTO", "jpegphoto");
 if (!defined("LDAP_CIVILITE")) define ("LDAP_CIVILITE", "supanncivilite");
 if (!defined("LDAP_UP1_TERMS_OF_USE")) define ("LDAP_UP1_TERMS_OF_USE", "up1termsofuse");
 if (!defined("LDAP_NUMETU")) define ("LDAP_NUMETU", "supannetuid");
@@ -25,7 +27,16 @@ if (!defined("PARAM_PENPAL")) define ("PARAM_PENPAL", "penpal");
 if (!defined("PARAM_PENPAL_AFFILIATION")) define ("PARAM_PENPAL_AFFILIATION", "penpalAffiliation");
 if (!defined("PARAM_APP_CLIENTE")) define ("PARAM_APP_CLIENTE", "app-cli");
 if (!defined("PARAM_RATIO")) define ("PARAM_RATIO", "ratio");
+if (!defined("PARAM_TYPE_PHOTO")) define ("PARAM_TYPE_PHOTO", "type-photo");
 
+if (!defined("LDAP_PHOTO")) { 
+   if (isset($_GET[PARAM_TYPE_PHOTO])) {
+       if ($_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU)  define ("LDAP_PHOTO", "jpegphoto;x-etu");
+       if ($_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU_IAE)  define ("LDAP_PHOTO", "jpegphoto;x-etu-iae");
+   } else {
+       define ("LDAP_PHOTO", "jpegphoto");
+   }	   
+}
 if (!defined("TYPE_EMPTY")) define ("TYPE_EMPTY", "empty");
 if (!defined("TYPE_FORBIDDEN")) define ("TYPE_FORBIDDEN", "forbidden");
 
