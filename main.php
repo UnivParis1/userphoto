@@ -29,6 +29,7 @@ if (!defined("PARAM_APP_CLIENTE")) define ("PARAM_APP_CLIENTE", "app-cli");
 if (!defined("PARAM_RATIO")) define ("PARAM_RATIO", "ratio");
 if (!defined("PARAM_TYPE_PHOTO")) define ("PARAM_TYPE_PHOTO", "type-photo");
 
+if (!defined("LDAP_PHOTO_ANNU"))  define ("LDAP_PHOTO_ANNU", "jpegphoto");
 if (!defined("LDAP_PHOTO")) { 
    if (isset($_GET[PARAM_TYPE_PHOTO])) {
        if ($_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU)  define ("LDAP_PHOTO", "jpegphoto;x-etu");
@@ -63,14 +64,17 @@ function getLdapUserInfo($rLdap, $filter) {
 	global $conf;
 	$resUser = array();
     $wantedAttrs = array(LDAP_UID, LDAP_NUMETU, LDAP_CIVILITE, LDAP_PRIMARY_AFFILIATION,
-			             LDAP_PHOTO, LDAP_UP1_TERMS_OF_USE, LDAP_MEMBER_OF);
+			             LDAP_PHOTO, LDAP_PHOTO_ANNU, LDAP_UP1_TERMS_OF_USE, LDAP_MEMBER_OF);
 	if ($filter != "" && $rLdap) {
 		$result = ldap_search($rLdap, $conf['ldap.dn']['people'], $filter, $wantedAttrs, 0, 1);
 		$entries = ldap_get_entries($rLdap, $result);
 		if ($result and ($entries["count"]==1)) {
 			foreach ($wantedAttrs as $attr) {
-				@$resUser[$attr] = $entries[0][strtolower($attr)];
-		 	}
+			   @$resUser[$attr] = $entries[0][strtolower($attr)];                           
+			}
+			if (isset($_GET[PARAM_TYPE_PHOTO]) && !isset($resUser[LDAP_PHOTO])) { // cas où on demande la photo de la carte mais qu'il n'y a pas l'attribut LDAP correspoondant
+			   @$resUser[LDAP_PHOTO] = $resUser[LDAP_PHOTO_ANNU];	// fallback sur la photo de "jpegPhoto"
+			}	
 		} 		
 	}
 	return $resUser;
