@@ -50,6 +50,8 @@ if (!defined("LDAP_ALLOW_PERSONNEL2")) define ("LDAP_ALLOW_PERSONNEL2", "{PHOTO}
 
 if (!defined("LDAP_MEMBEROF_ALLOW")) define ("LDAP_MEMBEROF_ALLOW", "cn=applications.userinfo.l2-users,ou=groups,dc=univ-paris1,dc=fr");
 if (!defined("APP_USERINFO")) define ("APP_USERINFO", "userinfo");
+if (!defined("LDAP_MEMBEROF_ALLOW2")) define ("LDAP_MEMBEROF_ALLOW2", "cn=applications.complements.ldap.consultation_photos_etudiants.utilisateurs_passe_droit,ou=groups,dc=univ-paris1,dc=fr");
+if (!defined("APP_COMP_PHOTOETU")) define ("APP_COMP_PHOTOETU", "comp-photoetu");
 
 if (!defined("ANONYMOUS_VALUE")) define ("ANONYMOUS_VALUE", "anonymous");
 
@@ -256,7 +258,8 @@ function checkAutorisationUser($userPhoto, $user) {
 	if ( ($profilUser==USER_STUDENT && in_array(LDAP_ALLOW_STUDENT, $listDroits)) ||
 	     ($profilUser==USER_PERSONNEL && (in_array(LDAP_ALLOW_PERSONNEL, $listDroits) || in_array(LDAP_ALLOW_PERSONNEL2, $listDroits))) ||
 		 ($profilUser!=USER_UNKNOWN && (($userPhoto[LDAP_UID][0] == $user[LDAP_UID][0] && !isset($_GET[PARAM_PENPAL_AFFILIATION])) 
-		  || (in_array(LDAP_MEMBEROF_ALLOW, $user[LDAP_MEMBER_OF]) && isset($_GET[PARAM_APP_CLIENTE]) && $_GET[PARAM_APP_CLIENTE]==APP_USERINFO)))
+		 || (in_array(LDAP_MEMBEROF_ALLOW, $user[LDAP_MEMBER_OF]) && isset($_GET[PARAM_APP_CLIENTE]) && $_GET[PARAM_APP_CLIENTE]==APP_USERINFO)
+		 || (in_array(LDAP_MEMBEROF_ALLOW2, $user[LDAP_MEMBER_OF]) && isset($_GET[PARAM_APP_CLIENTE]) && $_GET[PARAM_APP_CLIENTE]==APP_COMP_PHOTOETU)))
 	) {
 		$autorisation = true;
 	}				                       
