@@ -9,6 +9,8 @@ if (!defined("VAL_PHOTO_ETU")) define ("VAL_PHOTO_ETU", "etu");
 if (!defined("VAL_PHOTO_ETU_IAE")) define ("VAL_PHOTO_ETU_IAE", "etu-iae");
 if (!defined("VAL_PHOTO_ETU_ONLY")) define ("VAL_PHOTO_ETU_ONLY", "etu-only");
 if (!defined("VAL_PHOTO_ETU_IAE_ONLY")) define ("VAL_PHOTO_ETU_IAE_ONLY", "etu-iae-only");
+if (!defined("VAL_PHOTO_PRO")) define ("VAL_PHOTO_PRO", "pro");
+if (!defined("VAL_PHOTO_PRO_ONLY")) define ("VAL_PHOTO_PRO_ONLY", "pro-only");
 
 if (!defined("LDAP_PRIMARY_AFFILIATION")) define ("LDAP_PRIMARY_AFFILIATION", "edupersonprimaryaffiliation");
 if (!defined("LDAP_CIVILITE")) define ("LDAP_CIVILITE", "supanncivilite");
@@ -36,6 +38,7 @@ if (!defined("LDAP_PHOTO")) {
    if (isset($_GET[PARAM_TYPE_PHOTO])) {
        if ($_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU || $_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU_ONLY)  define ("LDAP_PHOTO", "jpegphoto;x-etu");
        if ($_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU_IAE || $_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU_IAE_ONLY)  define ("LDAP_PHOTO", "jpegphoto;x-etu-iae");
+       if ($_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_PRO || $_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_PRO_ONLY) define ("LDAP_PHOTO", "jpegphoto;x-pro");
    } else {
        define ("LDAP_PHOTO", "jpegphoto");
    }	   
@@ -77,7 +80,7 @@ function getLdapUserInfo($rLdap, $filter) {
 			   @$resUser[$attr] = $entries[0][strtolower($attr)];                           
 			}
 			if (isset($_GET[PARAM_TYPE_PHOTO]) && !isset($resUser[LDAP_PHOTO])) { // cas où on demande la photo de la carte mais qu'il n'y a pas l'attribut LDAP correspoondant
-			 if ($_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU || $_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU_IAE) {  // cas où il faut faire un fallback	
+			 if ($_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU || $_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU_IAE || $_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_PRO) {  // cas où il faut faire un fallback	
 			   @$resUser[LDAP_PHOTO] = $resUser[LDAP_PHOTO_ANNU];	// fallback sur la photo de "jpegPhoto"
 			 }	 
 			}	
@@ -198,7 +201,7 @@ function afficheUserPhoto($userPhoto, $userAutorisation=null, $userAutorisation2
 			$userPhoto[LDAP_PHOTO][0] = getPhotoEtu($userPhoto[LDAP_NUMETU][0]);
 		}
 		if ($userPhoto[LDAP_PHOTO][0] == null) {  // pas de photo trouvée 
-		  if (isset($_GET[PARAM_TYPE_PHOTO]) && ($_GET[PARAM_TYPE_PHOTO]==VAL_PHOTO_ETU_ONLY || $_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU_IAE)) {
+		  if (isset($_GET[PARAM_TYPE_PHOTO]) && ($_GET[PARAM_TYPE_PHOTO]==VAL_PHOTO_ETU_ONLY || $_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_ETU_IAE_ONLY || $_GET[PARAM_TYPE_PHOTO] == VAL_PHOTO_PRO_ONLY)) {
                      header('HTTP/1.1 404 Not Found');
                      exit;  
 		  } else {	  
