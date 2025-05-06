@@ -34,14 +34,15 @@ if ($rc_uid) {
   } else {
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $conf['rocket.chat']['url'] . "/api/v1/me");
+    $url = $conf['rocket.chat']['url'] . "/api/v1/me";
+    curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [ 'X-User-Id: ' . $rc_uid, 'X-Auth-Token: ' . $rc_token ]);
     $server_output = curl_exec($ch);
 
     $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     if ($status !== 200) { 
-        error_log("rocket.chat api/v1/me returned $status: $server_output");
+        error_log("rocket.chat $url returned $status: $server_output" . curl_error($ch));
         $server_output = null;
     }
     curl_close ($ch);
